@@ -1,0 +1,42 @@
+{
+    "url": "http://example.com",
+    "path": "//div[@class='example']",
+    "response_type": "html",
+    "macros": [
+        {
+            "kind": "scroll",
+            "xpath": null,
+            "extra": null
+        },
+        {
+            "kind": "click",
+            "xpath": "//button[@id='exampleButton']",
+            "extra": null
+        },
+        {
+            "kind": "wait",
+            "xpath": "//div[@class='loading']",
+            "extra": 5
+        },
+        {
+            "kind": "type",
+            "xpath": "//input[@id='exampleInput']",
+            "extra": "example text"
+        }
+    ],
+    "capture": "outerhtml",
+    "conditions": [
+        {
+            "type": "greater_than",
+            "value": 10
+        },
+        {
+            "type": "equals",
+            "value": "example text"
+        },
+        {
+            "type": "less_than",
+            "value": 20
+        }
+    ]
+}

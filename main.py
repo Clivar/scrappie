@@ -2,6 +2,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from typing import List
 from dataclasses import dataclass
 import json
+import sys
 from capture import validate_capture_type
 from extract import extract_html, extract_json
 
@@ -31,7 +32,15 @@ def extract(response_type: str, url: str, path: str, macros: List[Macro]):
     elif response_type == 'html':
         return extract_html(url, path, macros)
 
-def main(json_file):
+def main():
+    # Check if there is at least one argument
+    if len(sys.argv) < 2:
+        print("Missing argument: job file")
+        return
+
+    # The first argument is the script name itself, so we take the second
+    json_file = sys.argv[1]
+
     with open(json_file, 'r') as file:
         data = json.load(file)
     job = Job(**data)
@@ -60,3 +69,6 @@ def main(json_file):
         results.append(result)
     
     notify(results, job.conditions)
+
+if __name__ == "__main__":
+    main()
