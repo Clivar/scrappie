@@ -2,28 +2,31 @@ from common import retry
 from shared_driver import SharedDriver
 
 def validate_capture_type(capture_type: str, response_type: str) -> bool:
-    allowed_types = {'outerhtml', 'innerhtml', 'text', 'func'}
-    allowed_types_for_json = {'text', 'func'}
+    allowed_types = {'outerhtml', 'innerhtml', 'text'}
+    allowed_types_for_json = {'text'}
+
+    if capture_type.startswith('func:'):
+        return True
 
     if response_type == 'json':
         if capture_type not in allowed_types_for_json:
             print(f"Invalid capture_type for JSON response: {capture_type}")
             return False
-    else:
-        if capture_type not in allowed_types:
-            print(f"Invalid capture_type: {capture_type}")
-            return False
+    elif capture_type not in allowed_types:
+        print(f"Invalid capture_type: {capture_type}")
+        return False
 
     return True
 
 def execute_func(script):
     driver = SharedDriver.get_instance()
     result = driver.execute_script(script)
-
     if isinstance(result, list) and len(result) == 2:
         return tuple(result)
+    elif not isinstance(result, list):
+        return result, result
 
-    raise ValueError('Script did not return an array with exactly 2 items')
+    raise ValueError('Script did not return one value or an array with exactly 2 items')
 
 @retry()
 def capture_element(element, capture_type: str, url: str):
@@ -35,7 +38,7 @@ def capture_element(element, capture_type: str, url: str):
         return element.text, element.text
     elif capture_type.startswith('func:'):
         func = capture_type[5:]
-        func = f"return ({func})({element.get_attribute('innerHTML')}, {element.get_attribute('outerHTML')}, {element.text}, {url})"
+        func = f"return (function(innerhtml, outerhtml, text, url) {{ {func} }})('{element.get_attribute('outerHTML')}', '{element.get_attribute('innerHTML')}', '{element.text}', '{url}')"
         return execute_func(func)
 
 @retry()   
@@ -44,5 +47,5 @@ def capture_json_value(value, capture_type: str, url: str):
         return value, value
     elif capture_type.startswith('func:'):
         func = capture_type[5:]
-        func = f"return ({func})({value}, {url})"
+        func = f"return (function(value, url) {{ {func} }})('{value}', '{url}')"
         return execute_func(func)

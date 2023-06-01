@@ -24,7 +24,7 @@
             "extra": "example text"
         }
     ],
-    "capture": "outerhtml",
+    "capture_type": "outerhtml",
     "conditions": [
         {
             "type": "greater_than",

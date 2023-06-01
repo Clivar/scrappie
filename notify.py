@@ -7,12 +7,12 @@ class Condition:
     value: Any
 
 def validate_conditions(conditions: List[Condition]):
-    known_types = {'greater than', 'equals', 'less than'}
+    known_types = {'greater_than', 'equals', 'less_than'}
     for condition in conditions:
         if condition.type not in known_types:
             print(f"Unknown condition type: {condition.type}")
             return False
-        if condition.type in {'greater than', 'less than'} and not isinstance(condition.value, (int, float)):
+        if condition.type in {'greater_than', 'less_than'} and not isinstance(condition.value, (int, float)):
             print(f"For '{condition.type}' condition, value should be a number. Got: {condition.value}")
             return False
         elif condition.type == 'equals' and not isinstance(condition.value, (int, float, str)):
@@ -21,20 +21,21 @@ def validate_conditions(conditions: List[Condition]):
     return True
 
 def check_condition(condition: Condition, result) -> bool:
-    if condition.type == 'equals' and result != condition.value:
-        print(f"Condition not met: {result} != {condition.value}")
+    if condition.type == 'equals' and result.match != condition.value:
         return False
-    elif condition.type == 'greater_than' and result <= condition.value:
-        print(f"Condition not met: {result} <= {condition.value}")
+    elif condition.type == 'greater_than' and float(result.match) <= condition.value:
         return False
-    elif condition.type == 'less_than' and result >= condition.value:
-        print(f"Condition not met: {result} >= {condition.value}")
+    elif condition.type == 'less_than' and float(result.match) >= condition.value:
         return False
     return True
 
-def notify(results, conditions):
-    for result in results:
-        for condition in conditions:
-            if check_condition(condition, result):
-                print(f"Condition met: {result}")
+def notify(result, conditions):
+    for condition in conditions:
+        if check_condition(condition, result):
+            if condition.type == "equals":
+                print(f"Condition met: Result {result.order}'s match '{result.match}' equals the expected value '{condition.value}'")
+            elif condition.type == "greater_than":
+                print(f"Condition met: Result {result.order}'s match '{result.match}' is greater than the expected value '{condition.value}'")
+            elif condition.type == "less_than":
+                print(f"Condition met: Result {result.order}'s match '{result.match}' is less than the expected value '{condition.value}'")
 
