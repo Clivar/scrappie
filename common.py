@@ -1,5 +1,7 @@
 import time
 from functools import wraps
+import logging
+logger = logging.getLogger(__name__)
 
 def retry(tries=3, delay=1, backoff=2):
     """Retry calling the decorated function using an exponential backoff."""
@@ -13,7 +15,7 @@ def retry(tries=3, delay=1, backoff=2):
                 try:
                     return func(*args, **kwargs)
                 except Exception as e:
-                    print(f"{str(e)}, Retrying in {mdelay} seconds...")
+                    logger.warn(f"{str(e)}, Retrying in {mdelay} seconds...")
                     time.sleep(mdelay)
                     mtries -= 1
                     mdelay *= backoff

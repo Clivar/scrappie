@@ -10,6 +10,8 @@ from common import retry
 from macro import Macro, perform_macro
 from shared_driver import SharedDriver
 from dataclasses import dataclass
+import logging
+logger = logging.getLogger(__name__)
 
 @dataclass
 class ExtractResult:
@@ -20,19 +22,26 @@ class ExtractResult:
 
 @retry()
 def extract_json(url: str, post_body: str, path: str, capture_type: str):
+    logger.info(f"Request to '{url}'")
     if post_body:
         headers = {"Content-Type": "application/json", 'Accept': 'application/json'}
-        response = requests.post(url, data=post_body, headers=headers, timeout=5).json()
+        response = requests.post(url, data=post_body, headers=headers, timeout=5)
+        logger.debug(response.text)
+        response = response.json()
     else:
-        response = requests.get(url, timeout=5).json()
+        response = requests.get(url, timeout=5)
+        logger.debug(response.text)
+        response = response.json()
     jsonpath_expr = parse(path)
     values = [match.value for match in jsonpath_expr.find(response)]
     for i, value in enumerate(values):
+        logger.debug(f"Raw match #{i}: {value}")
         match_key, match = capture_json_value(value, capture_type, url)
         yield ExtractResult(i, match_key, match)
 
 @retry()
 def extract_html(url: str, path: str, macros: List[Macro], capture_type: str):
+    logger.info(f"Request to '{url}'")
     driver = SharedDriver.get_instance()    
     driver.get(url)
 
@@ -45,5 +54,6 @@ def extract_html(url: str, path: str, macros: List[Macro], capture_type: str):
     elements = driver.find_elements(By.XPATH, path)
 
     for i, element in enumerate(elements):
+        logger.debug(f"Raw match #{i}: {element.get_attribute('outerHTML')}")
         match_key, match = capture_element(element, capture_type, url)
         yield ExtractResult(i, match_key, match)

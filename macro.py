@@ -7,6 +7,8 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 
 from shared_driver import SharedDriver
+import logging
+logger = logging.getLogger(__name__)
 
 @dataclass
 class Macro:
@@ -18,19 +20,19 @@ def validate_macros(macros: List[Macro]):
     known_kinds = {'scroll', 'click', 'wait', 'type'}
     for macro in macros:
         if macro.kind not in known_kinds:
-            print(f"Unknown macro kind: {macro.kind}")
+            logger.error(f"Unknown macro kind: {macro.kind}")
             return False
         if macro.kind == 'scroll' and (macro.xpath or macro.extra):
-            print(f"Macro 'scroll' should not have 'xpath' or 'extra' properties")
+            logger.error(f"Macro 'scroll' should not have 'xpath' or 'extra' properties")
             return False
         if macro.kind == 'click' and (not macro.xpath or macro.extra):
-            print(f"Macro 'click' should have 'xpath' and should not have 'extra'")
+            logger.error(f"Macro 'click' should have 'xpath' and should not have 'extra'")
             return False
         if macro.kind == 'wait' and not (macro.xpath or (macro.extra and isinstance(macro.extra, int))):
-            print(f"Macro 'wait' should have 'xpath' or 'extra' (as int)")
+            logger.error(f"Macro 'wait' should have 'xpath' or 'extra' (as int)")
             return False
         if macro.kind == 'type' and (not macro.xpath or not macro.extra):
-            print(f"Macro 'type' should have both 'xpath' and 'extra'")
+            logger.error(f"Macro 'type' should have both 'xpath' and 'extra'")
             return False
     return True
 

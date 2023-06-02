@@ -1,5 +1,7 @@
 from common import retry
 from shared_driver import SharedDriver
+import logging
+logger = logging.getLogger(__name__)
 
 def validate_capture_type(capture_type: str, response_type: str) -> bool:
     allowed_types = {'outerhtml', 'innerhtml', 'text'}
@@ -10,10 +12,10 @@ def validate_capture_type(capture_type: str, response_type: str) -> bool:
 
     if response_type == 'json':
         if capture_type not in allowed_types_for_json:
-            print(f"Invalid capture_type for JSON response: {capture_type}")
+            logger.error(f"Invalid capture_type for JSON response: {capture_type}")
             return False
     elif capture_type not in allowed_types:
-        print(f"Invalid capture_type: {capture_type}")
+        logger.error(f"Invalid capture_type: {capture_type}")
         return False
 
     return True
